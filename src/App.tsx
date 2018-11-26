@@ -1,15 +1,21 @@
 import * as React from 'react';
-import SocketHandler from "./api";
+import SocketHandler from "./api/SocketHandler";
 import './App.css';
 import logo from './logo.svg';
+import Video from "./Video/Video";
 
-class App extends React.Component {
-    public state: any;
+interface IStateApp {
+    count: string;
+    message: string;
+}
+class App extends React.Component <{}, IStateApp>{
+    public state: IStateApp;
     public room: string;
     public socket = SocketHandler.getInstance();
     constructor(props: any) {
         super(props);
         this.state = {
+            count: "",
             message: ""
         };
         this.onInput = this.onInput.bind(this);
@@ -18,10 +24,18 @@ class App extends React.Component {
     }
 
     public componentDidMount() {
-        this.socket.connect(this.room);
+        this.socket.count((count: string) => { this.setState({ count })});
         this.socket.receive((message: string) => {
             this.setState({
                 message
+            })
+        });
+    }
+
+    public componentWillUnmount() {
+        this.socket.count((count: string) => {
+            this.setState({
+                count
             })
         });
     }
@@ -31,11 +45,11 @@ class App extends React.Component {
             <div className="App">
                 <header className="App-header">
                     <img src={logo} className="App-logo" alt="logo" />
-                    <h1 className="App-title">{this.state.message}</h1>
+                    <h1 className="App-title">{this.state.message} {this.state.count}</h1>
                     <input type={"text"} onInput={this.onInput}/>
                 </header>
                 <p className="App-intro">
-                    To get started, edit <code>src/App.tsx</code> and save to reload.
+                    <Video counter={this.state.count} room={this.room}/>
                 </p>
             </div>
         );
