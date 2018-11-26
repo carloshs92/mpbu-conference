@@ -48,8 +48,6 @@ class LocalMediaHandler {
     public createAnswer(newDescription: RTCSessionDescriptionInit) {
         console.log('LocalMediaHandler --> createAnswer', newDescription);
         if (newDescription.type === 'offer') {
-            this.pc.setRemoteDescription(newDescription)
-        } else {
             this.pc.setRemoteDescription(newDescription);
             this.pc.createAnswer()
                 .then((description: RTCSessionDescriptionInit) => {
@@ -60,8 +58,14 @@ class LocalMediaHandler {
                 .catch((error: any) => {
                     console.log('LocalMediaHandler --> createAnswer ERRROR', error);
                 })
+        } else {
+            this.pc.setRemoteDescription(newDescription);
         }
 
+    }
+
+    public addCandidate(iceCandidate: RTCIceCandidate) {
+        this.pc.addIceCandidate(iceCandidate);
     }
 
     private onCreateOfferSuccess(description: RTCSessionDescriptionInit) {
@@ -81,7 +85,7 @@ class LocalMediaHandler {
     }
 
     private onIceCandidate(event: RTCPeerConnectionIceEvent) {
-        console.log('LocalMediaHandler --> onIceCandidate', event.candidate);
+        console.log('BOTH LocalMediaHandler --> onIceCandidate', event.candidate);
         if(event.candidate != null) {
             console.log('LocalMediaHandler --> onIceCandidate THIS CANDIDATE', event.candidate);
             this.socketHandler.sendCandidate(event.candidate);

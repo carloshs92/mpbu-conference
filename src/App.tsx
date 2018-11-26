@@ -30,6 +30,7 @@ class App extends React.Component <{}, IStateApp>{
                 message
             })
         });
+        this.socket.callCount();
     }
 
     public componentWillUnmount() {

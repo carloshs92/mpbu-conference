@@ -36,6 +36,10 @@ class SocketHandler {
         });
     }
 
+    public callCount() {
+        this.socket.emit('call_count');
+    }
+
     public sendCandidate(candidate: RTCIceCandidate) {
         this.socket.emit('send_candidate', candidate)
 

@@ -52,22 +52,13 @@ class Video extends React.Component <IPropsVideo, {}>{
 
     private getCandidate(iceCandidate: RTCIceCandidate) {
         console.log('Video => onNewCandidate');
-        try {
-            this.localMediaHandler.peerConnection.addIceCandidate(iceCandidate)
-                .then(()=> {
-                    console.log('Video => addIceCandidate Success');
-                    this.socket.sendCandidate(iceCandidate);
-                })
-                .catch((e) => {
-                    console.log('Video => addIceCandidate Error', e);
-                });
-        } catch (e) {
-            console.log('Video => onNewCandidate ERROR', e);
-        }
+        this.localMediaHandler.addCandidate(iceCandidate);
     }
 
     private getDescription(description: RTCSessionDescriptionInit) {
-        try {
+        if (!!this.localMediaHandler) {
+            this.localMediaHandler.createAnswer(description);
+        } else {
             console.log('Video => onNewDescription');
             const video: HTMLVideoElement = document.getElementById('video2') as HTMLVideoElement
                 || this.createVideo('2');
@@ -75,9 +66,9 @@ class Video extends React.Component <IPropsVideo, {}>{
                 this.socket,
                 video,
                 this.localStream);
+            this.localMediaHandler.addTrack();
+            this.localMediaHandler.createOffer();
             this.localMediaHandler.createAnswer(description);
-        } catch (e) {
-            console.log('Video => onNewDescription ERROR', e);
         }
     }
 
@@ -100,15 +91,19 @@ class Video extends React.Component <IPropsVideo, {}>{
             this.videoRef.current.srcObject = stream;
             this.localStream = stream;
             this.socket.connect(this.props.room);
+            console.log('Video => onNewConnection counter', this.props.counter);
             this.socket.onNewConnection(() => {
-                console.log('Video => onNewConnection');
-                const video = this.createVideo('2');
-                this.localMediaHandler = new LocalMediaHandler(
-                    this.socket,
-                    video,
-                    this.localStream);
-                this.localMediaHandler.addTrack();
-                this.localMediaHandler.createOffer();
+                console.log('Video => onNewConnection counter', this.props.counter);
+                if (parseInt(this.props.counter, 10) < 2) {
+                    console.log('Video => onNewConnection');
+                    const video = this.createVideo('2');
+                    this.localMediaHandler = new LocalMediaHandler(
+                        this.socket,
+                        video,
+                        this.localStream);
+                    this.localMediaHandler.addTrack();
+                    this.localMediaHandler.createOffer();
+                }
             });
             this.socket.onNewDescription(this.getDescription);
             this.socket.onNewCandidate(this.getCandidate);
