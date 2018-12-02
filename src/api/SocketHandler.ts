@@ -12,7 +12,7 @@ class SocketHandler {
     private socket: any;
 
     private constructor() {
-        this.socket = io('http://localhost:5000/');
+        this.socket = io('http://0.0.0.0:5000/');
     }
 
     public send(text: string) {
